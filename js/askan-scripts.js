@@ -1,90 +1,58 @@
+
 jQuery(document).ready(function($) {
-
-  //   var loaderanimationtouchend = lottie.loadAnimation({
-  //     container: document.getElementById('loader-lottie-animation-for-touchend'),
-  //     renderer: 'svg',
-  //     loop: true,
-  //     autoplay: false,
-  //     path: ajax_object.url + '/images/touchendloader.json' // Replace with the actual path to your Lottie file
-  // });
-
-  // function showMainLoaderTouchend() {
-  //     $('#loader-touchend').show();
-  //     loaderanimationtouchend.play();
-  // }
+  console.log('ready');
   /// reload page scrooll
-  let isMenuOpen = false;
+let touchStartY = 0;
+let touchEndY = 0;
+let requiredDistance = 300; 
 
-  $('.header-content .toggle-icon').on('click', function() {
-    $('body').css({
-      overflow: 'hidden',
-      height: '100vh'
-    });
-    $('#menu-overlay').show(); // הצג את השכבה החופפת
-    isMenuOpen = true; // עדכון מצב פתיחת התפריט
-  });
-
-  // כאשר התפריט נסגר
-  $('.side-manu .close').on('click', function() {
-    $('body').css({
-      overflow: '',
-      height: ''
-    });
-    $('#menu-overlay').hide(); // הסתר את השכבה החופפת
-    isMenuOpen = false; // עדכון מצב סגירת התפריט
-  });
-
-  // משתני מגע להתחלת וסיום מגע
-  let touchStartY = 0;
-  let touchEndY = 0;
-  let requiredDistance = 300;
-
-  // אירוע התחלת מגע
-  $(document).on('touchstart', function(e) {
-    if (!isMenuOpen && $(window).scrollTop() === 0) {
-      touchStartY = e.originalEvent.touches[0].clientY;
+$(document).on('touchstart', function(e) {
+    if ($(window).scrollTop() === 0) {
+        touchStartY = e.originalEvent.touches[0].clientY;
     }
-  });
+});
 
-  // אירוע תנועת מגע
-  $(document).on('touchmove', function(e) {
-    if (!isMenuOpen && $(window).scrollTop() === 0) {
-      touchEndY = e.originalEvent.touches[0].clientY;
+$(document).on('touchmove', function(e) {
+    if ($(window).scrollTop() === 0) {
+        touchEndY = e.originalEvent.touches[0].clientY;
     }
-  });
+});
 
-  // אירוע סיום מגע
-  $(document).on('touchend', function(e) {
-    if (!isMenuOpen && $(window).scrollTop() === 0 && (touchEndY - touchStartY) > requiredDistance) {
-      // showMainLoaderTouchend()
+$(document).on('touchend', function(e) {
+    if ($(window).scrollTop() === 0 && (touchEndY - touchStartY) > requiredDistance) {
+        $('#loader').show(); 
 
-      setTimeout(function() {
-        window.location.reload();
-      }, 300);
+        setTimeout(function() {
+            window.location.reload();
+        }, 300); 
     }
-  });
+});
 
   /// end reload page scrooll
 
-
-
-
-
-
   $('.search').click(function() {
-    $('#menu-overlay').show(); // הצג את השכבה החופפת
-
     $('#searchBox').fadeIn(); // מציג את רובריקת החיפוש
 });
 
 $('#closeSearch').click(function(event) {
-  $('#menu-overlay').hide(); // הצג את השכבה החופפת
-
     event.stopPropagation(); // מונע את ההתפשטות של האירוע
     $('#searchBox').fadeOut(); // מסתיר את רובריקת החיפוש
 });
 
+  $('.open-menu-button').on('click', function() {
+    $('body').css({
+      overflow: 'hidden',
+      height: '100vh'
+    });
+  });
 
+  // כאשר סוגרים את התפריט הנפתח
+  $('.close-menu-button').on('click', function() {
+    $('body').css({
+      overflow: '',
+      height: ''
+    });
+  });
 
 
   // scrool menu to active item
@@ -115,6 +83,7 @@ $('#closeSearch').click(function(event) {
 
   ///menu
   $('.header-content .toggle-icon').on('click', function() {
+    console.log('toggle');
     var sidebar = $('.side-manu');
         sidebar.animate({right: '0px'}, 300);
 
@@ -144,7 +113,7 @@ $('#closeSearch').click(function(event) {
     var that = $(this); 
 
     $.ajax({
-      url: askan_js_ajax_object.ajax_url,
+      url: ajax_object.ajax_url,
       type: 'POST',
       data: {
           action: 'post_report',

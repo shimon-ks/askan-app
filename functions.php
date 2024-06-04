@@ -1,9 +1,8 @@
 <?php
-	ini_set('display_errors', '1');
-	ini_set('display_startup_errors', '1');
-	error_reporting(E_ALL);
+	// ini_set('display_errors', '1');
+	// ini_set('display_startup_errors', '1');
+	// error_reporting(E_ALL);
 
-	
 /**
  * askan functions and definitions
  *
@@ -144,7 +143,7 @@ add_action( 'widgets_init', 'askan_widgets_init' );
  */
 
 function askan_scripts() {
-	wp_enqueue_style( 'askan-style', get_stylesheet_uri(), array(), _S_VERSION );
+	wp_enqueue_style( 'askan-style', get_stylesheet_uri(), array(),  time() );
 	wp_style_add_data( 'askan-style', 'rtl', 'replace' );
 	wp_enqueue_script( 'askan-navigation', get_template_directory_uri() . '/js/navigation.js', array(), _S_VERSION, true );    
 	// slick
@@ -153,11 +152,20 @@ function askan_scripts() {
 	wp_enqueue_script( 'slick-script',  get_template_directory_uri().'/assets/src/library/js/slick.min.js', array('jquery'), false );	
 	wp_enqueue_script( 'carousel-js', get_template_directory_uri() . '/assets/src/carousel/index.js', array('jquery', 'slick-script'), filemtime( untrailingslashit( get_template_directory() ) . '/assets/src/carousel/index.js' ), true );
 
-	wp_enqueue_script('askan-js', get_template_directory_uri().'/js/scripts.js',array(), time(), true);
-	wp_localize_script('askan-js', 'ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
+	wp_enqueue_script('lottie', 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.4/lottie.min.js', array(), '5.7.4', true);
 
-	wp_enqueue_script('user-data', get_template_directory_uri().'/js/user-data.js',array(), null);
-	wp_localize_script('user-data', 'ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
+	wp_enqueue_script('askan-js', get_template_directory_uri().'/js/scripts.js',array('lottie'), time(), true);
+	wp_localize_script('askan-js', 'askan_js_ajax_object', array('ajax_url' => admin_url('admin-ajax.php')));
+
+
+	wp_enqueue_script('user-data', get_template_directory_uri().'/js/user-data.js',array(),time(), true);
+    wp_localize_script('user-data', 'ajax_object', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'url' => get_template_directory_uri()
+    ));
+
+
+
 
 
 	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
@@ -165,11 +173,8 @@ function askan_scripts() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'askan_scripts' );
-add_action( 'wp_enqueue_scripts', 'askan_more_scripts' );
-function askan_more_scripts() {
 
-	
-}
+
 
 /**
  * Implement the Custom Header feature.
@@ -296,7 +301,7 @@ if (isset( $_GET['import_posts_web']) ) {
 	include_once( get_template_directory() . '/scrape/scrape_web_jdn.php');
 	include_once( get_template_directory() . '/scrape/scrape_web_bizzness.php');
 	include_once( get_template_directory() . '/scrape/scrape_web_kikar.php');
-	include_once( get_template_directory() . '/scrape/scrape_web_bhol.php');
+	// include_once( get_template_directory() . '/scrape/scrape_web_bhol.php');
 	// include_once( get_template_directory() . '/scrape/scrape_web_h10.php');
 	die;
 

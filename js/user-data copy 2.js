@@ -1,82 +1,30 @@
-$(document).ready(function() {
+jQuery(document).ready(function($) {
+
     const debug = false;
-    let userId = localStorage.getItem('userId');
-    let isLoading = false; // Flag to prevent multiple AJAX requests
-
-    var animation = lottie.loadAnimation({
-        container: document.getElementById('lottie-animation'),
-        renderer: 'svg',
-        loop: true,
-        autoplay: false,
-        path: ajax_object.url + '/images/loader.json' // Replace with the actual path to your Lottie file
-    });
-
-    function showLoader() {
-        $('#lottie-loader').show();
-        animation.play();
-        $('.side-manu').addClass('loading');
-        $('.side-manu input').prop('disabled', true); // Disable all inputs
-    }
-
-    function hideLoader() {
-        $('#lottie-loader').hide();
-        animation.stop();
-        $('.side-manu').removeClass('loading');
-        $('.side-manu input').prop('disabled', false); // Enable all inputs
-    }
-    showLoader();
-
-
-
-
-    var loaderanimation = lottie.loadAnimation({
-        container: document.getElementById('loader-lottie-animation'),
-        renderer: 'svg',
-        loop: true,
-        autoplay: false,
-        path: ajax_object.url + '/images/loader.json' // Replace with the actual path to your Lottie file
-    });
-    function showMainLoader() {
-        $('#loader').show();
-        loaderanimation.play();
-    }
-    
-    function hideMainLoader() {
-      $('#loader').hide();
-      loaderanimation.stop();
-    }
-    showMainLoader();
+    var userId = localStorage.getItem('userId');
 
     // function to get userId from localStorage
     function getUserIdFromLocalStorage() {
         return localStorage.getItem('userId');
     }
 
-    if (debug  === false) {
-            // Listen for messages from React Native
-        window.addEventListener('message', function(event) {
-            // alert('Received message from React Native:' + event.data);
-            if (event.data) {
-                const data = JSON.parse(event.data);
-                if (data.userId) {
-                    localStorage.setItem('userId', data.userId);
-                    // alert('Received userId from React Native:' + data.userId);
-                    
-                    // Perform necessary actions after receiving userId
-                    // registerUserIfNew();
-                    initEntryAdModal();
-                    initPostLinkClickHandler();
-                    initialLoad();
-
-                }
+    // Listen for messages from React Native
+    window.addEventListener('message', function(event) {
+        // alert('Received message from React Native:' + event.data);
+        if (event.data) {
+            const data = JSON.parse(event.data);
+            if (data.userId) {
+                localStorage.setItem('userId', data.userId);
+                // alert('Received userId from React Native:' + data.userId);
+                
+                // Perform necessary actions after receiving userId
+                // registerUserIfNew();
+                initEntryAdModal();
+                initPostLinkClickHandler();
+                initialLoad();
             }
-        });
-    }else{
-        userId = 'cc103ebf-0b1f-4cd6-82e0-1ed99803a143';
-        initEntryAdModal();
-        initPostLinkClickHandler();
-        initialLoad();
-    }
+        }
+    });
 
     function initEntryAdModal() {
         var modal = $('#adModal');
@@ -157,7 +105,6 @@ $(document).ready(function() {
     }
 
     function loadPosts(categories, sites, page, token, moraleChecked = 'moralenochacked') {
-        isLoading = true; // Set the flag to true to indicate a loading process
         $.ajax({
             url: ajax_object.ajax_url,
             type: 'POST',
@@ -177,18 +124,14 @@ $(document).ready(function() {
                 } else {
                     $('.posts').append(response);
                 }
-                hideMainLoader();
-                isLoading = false; // Reset the flag to false once the request is completed
             },
             error: function(xhr, status, error) {
                 alert('Error loading posts: ' + error);
-                isLoading = false; // Reset the flag to false in case of an error
             }
         });
     }
 
     function loadSearchResults(page, query) {
-        isLoading = true; // Set the flag to true to indicate a loading process
         $.ajax({
             url: ajax_object.ajax_url,
             type: 'POST',
@@ -205,21 +148,15 @@ $(document).ready(function() {
                 } else {
                     alert('No more posts found.');
                 }
-                isLoading = false; // Reset the flag to false once the request is completed
-                console.log('Search results loaded successfully.');
-                hideMainLoader();
-                hideLoader();
             },
             error: function(xhr, status, error) {
                 alert('Error loading search results: ' + error);
-                isLoading = false; // Reset the flag to false in case of an error
             }
         });
     }
 
     function initialLoad() {
         if (isSearchPage()) {
-            console.log('Loading search results...');
             var searchQuery = new URLSearchParams(window.location.search).get('s');
             loadSearchResults(currentPage, searchQuery);
         } else {
@@ -236,7 +173,6 @@ $(document).ready(function() {
                     var categoriesToLoad = categoryFromURL ? [categoryFromURL] : preferences.categories;
                     // alert('Preferences: ' + JSON.stringify(preferences));
                     loadPosts(categoriesToLoad, preferences.sites, currentPage, userId, preferences.moraleChecked);
-                    hideMainLoader();
                     markSelectedCheckboxes(preferences);
                 },
                 error: function(xhr, status, error) {
@@ -251,8 +187,7 @@ $(document).ready(function() {
     }
 
     $(window).scroll(function() {
-        if (!isLoading && $(window).scrollTop() + $(window).height() > $(document).height() - 100) {
-            isLoading = true; // Set the flag to true before starting the loading process
+        if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
             currentPage++;
             if (isSearchPage()) {
                 var searchQuery = new URLSearchParams(window.location.search).get('s');
@@ -274,7 +209,6 @@ $(document).ready(function() {
                     },
                     error: function(xhr, status, error) {
                         alert('Error loading user preferences on scroll: ' + error);
-                        isLoading = false; // Reset the flag in case of an error
                     }
                 });
             }
@@ -373,15 +307,15 @@ $(document).ready(function() {
     function markSelectedCheckboxes(preferences) {
         // alert('Marking selected checkboxes, preferences: ' + JSON.stringify(preferences));
 
-        if (preferences  && preferences.categories) {
-            preferences.categories.forEach(function(encodedCategory) {
+        if (preferences && preferences.data && preferences.data.categories) {
+            preferences.data.categories.forEach(function(encodedCategory) {
                 var category = decodeURIComponent(encodedCategory);
                 $(".cat-list #category-select[value='" + category + "']").prop('checked', true);
             });
         }
 
-        if (preferences  && preferences.sites) {
-            preferences.sites.forEach(function(site) {
+        if (preferences && preferences.data && preferences.data.sites) {
+            preferences.data.sites.forEach(function(site) {
                 $(".sites-slider .site-select[value='" + site + "']").prop('checked', true);
             });
         }
@@ -391,7 +325,6 @@ $(document).ready(function() {
         } else {
             $('#morale').prop('checked', false);
         }
-        hideLoader();
     }
 
     function registerUserIfNew() {

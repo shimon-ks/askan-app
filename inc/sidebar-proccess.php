@@ -122,6 +122,9 @@ function get_user_category() {
 
 
 function load_posts_by_preferences() {
+
+
+
     $page = !empty($_POST['page']) ? $_POST['page'] : 1;
     $is_first_page = $page == 1;
 
@@ -166,6 +169,7 @@ function load_posts_by_preferences() {
         'meta_query' => array()
     );
 
+
     if (isset($_POST['categories'])) {
         $category_ids = array_map(function($name) {
             $term = get_term_by('slug', $name, 'category');
@@ -173,20 +177,23 @@ function load_posts_by_preferences() {
                 return [];
             }
             $term_id = $term->term_id;
-            // מקבל את כל תת-הקטגוריות של הקטגוריה הנוכחית
             $child_ids = get_term_children($term_id, 'category');
-            // מוסיף את הקטגוריה הנוכחית למערך של תת-הקטגוריות
             return array_merge([$term_id], $child_ids);
         }, $_POST['categories']);
     
-        // משטח את המערך של מערכים למערך אחד של IDs
+        // סינון המערך כדי להסיר מערכים ריקים
+        $category_ids = array_filter($category_ids);
+    
+        // יצירת מערך שטוח של IDs
         $category_ids = array_reduce($category_ids, function($carry, $item) {
             return array_merge($carry, $item);
         }, []);
     
-        // מסנן את המערך כדי להסיר כל ערך שהוא NULL או כפילויות
-        $args['category__in'] = array_unique(array_filter($category_ids));
+        // סינון המערך כדי להסיר כפילויות
+        $args['category__in'] = array_unique($category_ids);
     }
+
+
 
     if (isset($_POST['sites'])) {
         $args['meta_query'][] = array(
@@ -197,26 +204,26 @@ function load_posts_by_preferences() {
     }
 
     if (isset($_POST['moraleChecked']) && $_POST['moraleChecked'] == 'moralechecked') {
-        $args['meta_query'] = array(
-            'relation' => 'AND',
+        $args['meta_query'][] = array(
+            'relation' => 'OR',
             array(
-                'relation' => 'OR',
-                array(
-                    'key' => 'morale_post',
-                    'compare' => 'NOT EXISTS' // פוסטים שאין להם בכלל את המפתח 'morale_post'
-                ),
-                array(
-                    'key' => 'morale_post',
-                    'value' => '1',
-                    'compare' => '!=' // פוסטים שיש להם את המפתח 'morale_post' וערכו שונה מ-'1'
-                )
+                'key' => 'morale_post',
+                'compare' => 'NOT EXISTS' // פוסטים שאין להם בכלל את המפתח 'morale_post'
+            ),
+            array(
+                'key' => 'morale_post',
+                'value' => '1',
+                'compare' => '!=' // פוסטים שיש להם את המפתח 'morale_post' וערכו שונה מ-'1'
             )
         );
     }
 
-    if (!empty($args['meta_query']) && !empty($args['category__in'])) {
+    // הוספת relation רק אם ישנם מספר תנאים ב-meta_query
+    if (!empty($args['meta_query']) && count($args['meta_query']) > 1) {
         $args['meta_query']['relation'] = 'AND';
     }
+
+
 
     $query = new WP_Query($args);
 
@@ -225,19 +232,15 @@ function load_posts_by_preferences() {
             get_template_part('template-parts/content', 'post');
         endwhile;
         the_ad('6448');
-
     endif;
 
     wp_die();
 }
 
-add_action('wp_ajax_load_posts_by_preferences', 'load_posts_by_preferences');
-add_action('wp_ajax_nopriv_load_posts_by_preferences', 'load_posts_by_preferences');
-
-
 
 add_action('wp_ajax_load_posts_by_preferences', 'load_posts_by_preferences');
 add_action('wp_ajax_nopriv_load_posts_by_preferences', 'load_posts_by_preferences');
+
 
 
 function morale_chacked() {
@@ -270,9 +273,9 @@ function load_search_results() {
     $query = new WP_Query($args);
 
     if ($query->have_posts()) {
-        if ($page == 1) {
-            the_ad('6448');
-        }
+        // if ($page == 1) {
+        //     the_ad('6448');
+        // }
         while ($query->have_posts()) {
             $query->the_post();
             get_template_part('template-parts/content', 'post');
@@ -317,7 +320,8 @@ function get_user_preferences() {
         'moraleChecked' => $firebaseManager->getUserMoraleChecked($userId)
     ];
 
-    wp_send_json_success($userPreferences);
+    echo json_encode($userPreferences);
+    die;
 }
 add_action('wp_ajax_get_user_preferences', 'get_user_preferences');
 add_action('wp_ajax_nopriv_get_user_preferences', 'get_user_preferences');

@@ -6,6 +6,9 @@ $terms = get_terms( array(
 ?>
 <div class="side-manu-warp">
     <div class="side-manu">
+        <div id="lottie-loader">
+            <div id="lottie-animation"></div>
+        </div>
         <span class="close"><i class="fa-solid fa-x"></i></span>
 
         <h3 class="main-menu-ttl">הגדרות והעדפות</h3>

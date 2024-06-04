@@ -36,9 +36,17 @@
 
 
 <body <?php body_class(); ?>>
+<div id="menu-overlay"></div>
 
-<div id="loader" style="display: none; position: fixed; z-index: 1000; top: 0; left: 0; height: 100%; width: 100%; background: rgba(255, 255, 255, 0.8);">
-    <img src="<?php echo get_template_directory_uri().'/images/loader.gif'; ?>" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
+
+<div id="loader-touchend" >
+	<div id="loader-lottie-animation-for-touchend">
+		
+	</div>
+</div>
+
+<div id="loader" >
+	<div id="loader-lottie-animation"></div>
 </div>
 <?php wp_body_open(); 
 get_template_part('side-menu', 'none'); ?>
@@ -83,10 +91,10 @@ get_template_part('side-menu', 'none'); ?>
 		</nav> -->
 	</header>
 <div id="searchBox" style="display:none;">
-    <button id="closeSearch" class="close-search">X</button>
+    <button id="closeSearch" class="close-search"><i class="fa fa-close" aria-hidden="true"></i></button>
     <form action="<?php echo home_url('/'); ?>" method="get">
-        <input type="text" name="s" placeholder="Search..." required>
-        <button type="submit">Search</button>
+        <input type="text" name="s" placeholder="חיפוש..." required>
+        <button type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
     </form>
 </div>
 
